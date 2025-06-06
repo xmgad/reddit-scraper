@@ -671,8 +671,21 @@ def main():
     # Initialize scraper
     scraper = RedditScraper(CLIENT_ID, CLIENT_SECRET, USER_AGENT)
     
-    # Target subreddit
-    subreddit_name = "notebookLLM"
+    # Get target subreddit from user
+    print("\n🚀 Reddit Scraper - Free Tier Optimized")
+    print("=" * 50)
+    subreddit_name = input("Enter the subreddit name to scrape (e.g., 'NotebookLM' or 'python'): ").strip()
+    
+    # Clean the input (remove 'r/' prefix if present)
+    if subreddit_name.startswith('r/'):
+        subreddit_name = subreddit_name[2:]
+    
+    if not subreddit_name:
+        logger.error("No subreddit name provided. Exiting.")
+        return
+    
+    print(f"📡 Starting to scrape r/{subreddit_name}...")
+    print("=" * 50)
     
     try:
         # Run comprehensive scraping

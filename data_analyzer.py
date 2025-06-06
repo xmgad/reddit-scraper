@@ -388,29 +388,31 @@ Most Active Months (Top 5):
             report += f"  {day}: {count:,} posts\n"
         
         # Add author data
-        report += f"\nTOP AUTHORS
-===========\nMost Active (by post count):\n"
+        report += "\nTOP AUTHORS\n"
+        report += "===========\n"
+        report += "Most Active (by post count):\n"
         
         for i, (author, count) in enumerate(list(authors['top_authors_by_posts'].items())[:10], 1):
             report += f"  {i:2d}. {author}: {count} posts\n"
         
-        report += f"\nHighest Scoring (by total score):\n"
+        report += "\nHighest Scoring (by total score):\n"
         for i, (author, score) in enumerate(list(authors['top_authors_by_score'].items())[:10], 1):
             report += f"  {i:2d}. {author}: {score:,} total score\n"
         
         # Add content analysis
-        report += f"\nCONTENT ANALYSIS
-===============\nPost Types:\n"
+        report += "\nCONTENT ANALYSIS\n"
+        report += "===============\n"
+        report += "Post Types:\n"
         for post_type, count in content['post_types'].items():
             percentage = (count / overview['total_posts'] * 100) if overview['total_posts'] > 0 else 0
             report += f"  {post_type}: {count:,} ({percentage:.1f}%)\n"
         
-        report += f"\nScore Distribution:\n"
+        report += "\nScore Distribution:\n"
         for score_range, count in content['score_distribution'].items():
             percentage = (count / overview['total_posts'] * 100) if overview['total_posts'] > 0 else 0
             report += f"  {score_range}: {count:,} ({percentage:.1f}%)\n"
         
-        report += f"\nMost Common Title Words (Top 15):\n"
+        report += "\nMost Common Title Words (Top 15):\n"
         for i, (word, count) in enumerate(list(content['common_title_words'].items())[:15], 1):
             report += f"  {i:2d}. {word}: {count}\n"
         

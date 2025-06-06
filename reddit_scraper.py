@@ -22,12 +22,17 @@ import time
 import logging
 import hashlib
 import requests
+import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Set, Optional, Tuple
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 import random
 import re
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -652,10 +657,16 @@ class RedditScraper:
 
 def main():
     """Main function to run the scraper"""
-    # Reddit API credentials - you need to get these from Reddit
-    CLIENT_ID = "your_client_id_here"
-    CLIENT_SECRET = "your_client_secret_here"
-    USER_AGENT = "reddit_scraper_v1.0_by_your_username"
+    # Reddit API credentials - loaded from .env file
+    CLIENT_ID = os.getenv("CLIENT_ID")
+    CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+    USER_AGENT = os.getenv("USER_AGENT")
+    
+    # Validate that all required environment variables are present
+    if not all([CLIENT_ID, CLIENT_SECRET, USER_AGENT]):
+        logger.error("Missing required environment variables. Please check your .env file.")
+        logger.error("Required variables: CLIENT_ID, CLIENT_SECRET, USER_AGENT")
+        return
     
     # Initialize scraper
     scraper = RedditScraper(CLIENT_ID, CLIENT_SECRET, USER_AGENT)

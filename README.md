@@ -9,7 +9,10 @@ A comprehensive Reddit scraping pipeline designed to work within the constraints
 - **Comprehensive Data**: Posts + all comments with full metadata
 - **Deduplication**: Automatic removal of duplicate posts across strategies
 - **Progress Tracking**: Resume scraping from where you left off
-- **Export Options**: JSON, CSV, and analysis reports
+- **Multiple Export Formats**: JSON, CSV, and analysis reports
+- **LLM-Ready Outputs**: Structured JSON exports optimized for AI/ML processing
+- **RAG Pipeline Support**: Clean, hierarchical data structure for retrieval systems
+- **Secure Configuration**: Environment-based credential management
 
 ## 📋 API Limitations We Work Around
 
@@ -90,15 +93,19 @@ pip install -r requirements.txt
 
 ### 3. Configure the Scraper
 
-1. Copy `config_template.py` to `config.py`
-2. Replace the placeholder values with your credentials:
+Create a `.env` file in the project root directory with your Reddit API credentials:
 
-```python
-CLIENT_ID = "your_actual_client_id"
-CLIENT_SECRET = "your_actual_client_secret"
-USER_AGENT = "reddit_scraper_v1.0_by_yourusername"
-SUBREDDIT_NAME = "notebookLLM"  # or your target subreddit
+```bash
+# Reddit API Configuration
+CLIENT_ID = "your_client_id_here"
+CLIENT_SECRET = "your_client_secret_here"
+USER_AGENT = "reddit_scraper_v1.0_by_your_reddit_username"
 ```
+
+**Important**: 
+- Replace the placeholder values with your actual Reddit API credentials
+- The `.env` file is automatically ignored by git to keep your credentials secure
+- Make sure your `USER_AGENT` includes your Reddit username for API compliance
 
 ### 4. Run the Scraper
 
@@ -106,18 +113,88 @@ SUBREDDIT_NAME = "notebookLLM"  # or your target subreddit
 python reddit_scraper.py
 ```
 
-## 📊 Data Analysis and Export
+## 📊 Data Processing & Export
 
-After scraping, use the analyzer to get insights and export data:
+The pipeline provides multiple ways to access and process your scraped data:
+
+### 1. Direct Database Access
+Data is stored in SQLite (`reddit_data.db`) for efficient querying and analysis.
+
+### 2. Export for Further Processing
 
 ```bash
 python data_analyzer.py
 ```
 
-This generates:
-- `scraping_report.txt`: Comprehensive analysis report
-- `reddit_data_export.json`: Complete dataset in JSON format
-- `posts.csv` & `comments.csv`: Tabular data for analysis
+This generates multiple output formats:
+
+#### For Data Analysis & Reporting:
+- `scraping_report.txt`: Comprehensive analysis with statistics and insights
+- `posts.csv` & `comments.csv`: Tabular data for spreadsheet analysis
+
+#### For LLM & AI Processing:
+- `reddit_data_export.json`: **Structured JSON optimized for AI/ML workflows**
+
+### 3. LLM-Ready JSON Structure
+
+The JSON export is specifically designed for Large Language Model processing:
+
+```json
+{
+  "metadata": {
+    "total_posts": 150,
+    "total_comments": 1247,
+    "subreddit": "notebookLLM",
+    "export_timestamp": "2024-01-15T10:30:00Z",
+    "date_range": ["2023-01-01", "2024-01-15"]
+  },
+  "posts": [
+    {
+      "id": "abc123",
+      "title": "How to use NotebookLM effectively",
+      "content": "Full post text...",
+      "metadata": {
+        "author": "username",
+        "created_utc": 1704123456,
+        "score": 45,
+        "num_comments": 12
+      },
+      "comments": [
+        {
+          "id": "def456",
+          "content": "Great question! Here's my approach...",
+          "author": "commenter1",
+          "score": 8,
+          "depth": 0,
+          "replies": [...]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 4. Use Cases for Exported Data
+
+#### Retrieval-Augmented Generation (RAG):
+- Clean, hierarchical structure perfect for vector databases
+- Full conversation context preserved
+- Rich metadata for filtering and ranking
+
+#### LLM Fine-tuning:
+- Conversational format ideal for training dialogue models
+- Complete threads maintain context relationships
+- Quality indicators (scores, timestamps) for data filtering
+
+#### Thematic Analysis:
+- Post titles and content ready for topic modeling
+- Temporal data for trend analysis
+- Community interaction patterns via comment threads
+
+#### Knowledge Base Creation:
+- Question-answer pairs from post-comment relationships
+- FAQ generation from common discussion patterns
+- Expert knowledge extraction from high-scoring content
 
 ## 🗄️ Database Schema
 
@@ -175,25 +252,26 @@ The scraper stores data in SQLite with the following structure:
 For a typical subreddit like `notebookLLM`:
 
 - **Coverage**: 80-95% of all posts (depending on subreddit size and age)
-- **Time**: 2-6 hours for complete scrape (varies by content volume)
-- **Rate Compliance**: Stays well within free tier limits
+- **Time**: 2-4 minutes for small subreddits (~100 posts), 2-6 hours for large ones
+- **Rate Compliance**: Stays well within free tier limits (60 requests/minute)
 - **Data Quality**: Full post + comment data with all metadata
+- **Export Size**: JSON files typically 2-10x larger than CSV due to rich structure
 
 ## 🔧 Customization
 
 ### For Different Subreddits
 
-1. Update `SUBREDDIT_NAME` in config
-2. Customize `SEARCH_TERMS` for subreddit-specific keywords
-3. Adjust `START_DATE` based on subreddit creation date
+1. Change the subreddit name in the `main()` function of `reddit_scraper.py`
+2. Customize search terms in `_extract_search_terms()` for subreddit-specific keywords
+3. Adjust the start date in `_scrape_by_time_periods()` based on subreddit creation date
 
 ### Rate Limit Adjustment
 
 ```python
-# In config.py
-MAX_REQUESTS_PER_MINUTE = 45  # More conservative
+# In reddit_scraper.py, modify the RateLimiter initialization
+rate_limiter = RateLimiter(max_requests_per_minute=45)  # More conservative
 # or
-MAX_REQUESTS_PER_MINUTE = 90  # More aggressive (use carefully)
+rate_limiter = RateLimiter(max_requests_per_minute=90)  # More aggressive (use carefully)
 ```
 
 ### Search Terms Optimization
@@ -201,12 +279,15 @@ MAX_REQUESTS_PER_MINUTE = 90  # More aggressive (use carefully)
 Add domain-specific terms to improve coverage:
 
 ```python
-SEARCH_TERMS = [
-    # Add terms specific to your subreddit
-    "specific_term_1", "specific_term_2", 
-    # Common patterns in post titles
-    "weekly thread", "monthly update", etc.
-]
+# In reddit_scraper.py, modify the _extract_search_terms() method
+def _extract_search_terms(self) -> List[str]:
+    common_terms = [
+        # Add terms specific to your subreddit
+        "specific_term_1", "specific_term_2", 
+        # Common patterns in post titles
+        "weekly thread", "monthly update", "discussion"
+    ]
+    return common_terms
 ```
 
 ## 🚨 Important Considerations
@@ -241,7 +322,8 @@ SEARCH_TERMS = [
 
 2. **Authentication Errors**
    ```
-   Check your CLIENT_ID and CLIENT_SECRET are correct.
+   Check your .env file exists and contains valid credentials.
+   Verify CLIENT_ID and CLIENT_SECRET are correct (no quotes needed in .env).
    Ensure USER_AGENT includes your Reddit username.
    ```
 

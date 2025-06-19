@@ -1,0 +1,91 @@
+
+Reddit Scraping Report
+=====================
+Generated: 2025-06-19 02:31:08
+
+OVERVIEW STATISTICS
+==================
+Total Posts: 5,160
+Total Comments: 86,541
+Unique Authors: 3,908
+Posts with Comments: 4,746 (92.0%)
+
+Date Range: 2017-10-24 15:17:57 to 2025-06-18 21:58:24
+Average Score per Post: 12.89
+Average Comments per Post: 16.92
+
+Top Scoring Post: "NotebookLM Podcast Hosts Discover They’re AI, Not Human—Spiral Into Terrifying Existential Meltdown" (Score: 2604)
+
+TEMPORAL PATTERNS
+================
+Most Active Months (Top 5):
+  2025-05: 665 posts
+  2025-06: 524 posts
+  2024-10: 516 posts
+  2025-04: 423 posts
+  2025-03: 303 posts
+
+Most Active Days of Week:
+  Wednesday: 823 posts
+  Monday: 808 posts
+  Tuesday: 787 posts
+  Thursday: 754 posts
+  Friday: 698 posts
+  Sunday: 671 posts
+  Saturday: 619 posts
+
+TOP AUTHORS
+===========
+Most Active (by post count):
+   1. IamBecomeDeath187: 30 posts
+   2. Tough-Bicycle-9815: 19 posts
+   3. Boring-Temporary-340: 18 posts
+   4. BootstrappedAI: 17 posts
+   5. Worldharmony: 16 posts
+   6. 24KSports: 15 posts
+   7. Busy-Basket-5291: 14 posts
+   8. Dramatic15: 13 posts
+   9. Mesokosmos: 12 posts
+  10. Top_Sink9871: 11 posts
+
+Highest Scoring (by total score):
+   1. Lawncareguy85: 2,684 total score
+   2. Tdangerson: 1,241 total score
+   3. UtahUndercover: 1,025 total score
+   4. Business-West-9687: 849 total score
+   5. maybe-yeah: 820 total score
+   6. sorryaboutyourcats: 689 total score
+   7. MonkeyNuts81: 674 total score
+   8. BootstrappedAI: 647 total score
+   9. FeroLemur7: 507 total score
+  10. Harry_Oliver_: 477 total score
+
+CONTENT ANALYSIS
+===============
+Post Types:
+  Link Post: 1,821 (35.3%)
+  Text Post: 3,339 (64.7%)
+
+Score Distribution:
+  1-10: 3,510 (68.0%)
+  100+: 81 (1.6%)
+  11-50: 1,043 (20.2%)
+  51-100: 126 (2.4%)
+  Zero: 400 (7.8%)
+
+Most Common Title Words (Top 15):
+   1. the: 1070
+   2. for: 658
+   3. and: 559
+   4. notebooklm: 513
+   5. swing: 454
+   6. with: 435
+   7. help: 418
+   8. golf: 396
+   9. tips: 347
+  10. how: 346
+  11. any: 298
+  12. podcast: 287
+  13. what: 282
+  14. driver: 247
+  15. can: 243

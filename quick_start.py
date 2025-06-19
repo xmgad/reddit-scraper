@@ -30,10 +30,66 @@ class QuickRedditScraper:
         )
         self.posts_data = []
         self.comments_data = []
+        
+        # Keyword filtering
+        self.keywords = []
+        self.keyword_mode = 'disabled'  # 'disabled', 'include_only', 'exclude'
+        self.case_sensitive = False
+        self.search_in_content = True
     
+    def set_keyword_filter(self, keywords: list, mode: str = 'include_only', 
+                          case_sensitive: bool = False, search_in_content: bool = True):
+        """
+        Set keyword filtering options
+        
+        Args:
+            keywords: List of keywords to filter by
+            mode: 'include_only' (only posts with keywords), 'exclude' (posts without keywords), 'disabled' (no filtering)
+            case_sensitive: Whether keyword matching should be case sensitive
+            search_in_content: Whether to search in post content (selftext) in addition to title
+        """
+        self.keywords = [k.lower() if not case_sensitive else k for k in keywords]
+        self.keyword_mode = mode
+        self.case_sensitive = case_sensitive
+        self.search_in_content = search_in_content
+        
+        logger.info(f"Keyword filter set: mode={mode}, keywords={keywords}, case_sensitive={case_sensitive}")
+    
+    def _matches_keywords(self, post) -> bool:
+        """Check if a post matches the current keyword filter"""
+        if self.keyword_mode == 'disabled' or not self.keywords:
+            return True
+        
+        # Prepare text to search in
+        title = post.title if self.case_sensitive else post.title.lower()
+        content = ''
+        
+        if self.search_in_content and hasattr(post, 'selftext'):
+            content = getattr(post, 'selftext', '') 
+            content = content if self.case_sensitive else content.lower()
+        
+        search_text = f"{title} {content}".strip()
+        
+        # Check for keyword matches
+        matches_any_keyword = False
+        for keyword in self.keywords:
+            if keyword in search_text:
+                matches_any_keyword = True
+                break
+        
+        # Apply filtering logic based on mode
+        if self.keyword_mode == 'include_only':
+            return matches_any_keyword
+        elif self.keyword_mode == 'exclude':
+            return not matches_any_keyword
+        
+        return True
+
     def scrape_subreddit_sample(self, subreddit_name: str, limit: int = 100):
         """Scrape a sample of posts from a subreddit"""
         logger.info(f"Starting sample scrape of r/{subreddit_name} (limit: {limit})")
+        if self.keyword_mode != 'disabled':
+            logger.info(f"Keyword filtering active: {self.keyword_mode} - {self.keywords}")
         
         try:
             subreddit = self.reddit.subreddit(subreddit_name)
@@ -45,6 +101,10 @@ class QuickRedditScraper:
             # Scrape hot posts
             logger.info("Scraping hot posts...")
             for post in subreddit.hot(limit=limit):
+                # Apply keyword filter
+                if not self._matches_keywords(post):
+                    continue
+                    
                 post_data = self._process_post(post)
                 if post_data:
                     self.posts_data.append(post_data)
@@ -217,6 +277,63 @@ class QuickRedditScraper:
                 print(f"{i}. {title} (Score: {post['score']})")
         
         print("="*50)
+
+    def scrape_keywords_only(self, subreddit_name: str, keywords: list, 
+                           case_sensitive: bool = False, max_posts_per_keyword: int = 100):
+        """
+        Scrape only posts that match specific keywords using targeted search
+        
+        Args:
+            subreddit_name: Name of the subreddit to scrape
+            keywords: List of keywords to search for
+            case_sensitive: Whether search should be case sensitive
+            max_posts_per_keyword: Maximum posts to collect per keyword
+        """
+        logger.info(f"Starting keyword-only scrape of r/{subreddit_name} for keywords: {keywords}")
+        
+        subreddit = self.reddit.subreddit(subreddit_name)
+        total_posts = 0
+        
+        for keyword in keywords:
+            try:
+                logger.info(f"Searching for keyword: '{keyword}'")
+                
+                search_results = subreddit.search(
+                    keyword, 
+                    sort='new', 
+                    time_filter='all', 
+                    limit=max_posts_per_keyword
+                )
+                
+                keyword_posts = 0
+                for post in search_results:
+                    # Additional filtering if case sensitive
+                    if case_sensitive:
+                        title_text = post.title
+                        content_text = getattr(post, 'selftext', '')
+                        search_text = f"{title_text} {content_text}"
+                        
+                        if keyword not in search_text:
+                            continue
+                    
+                    post_data = self._process_post(post)
+                    if post_data:
+                        self.posts_data.append(post_data)
+                        keyword_posts += 1
+                        total_posts += 1
+                        
+                        # Get some comments for each post
+                        if post.num_comments > 0:
+                            self._process_post_comments(post, max_comments=10)
+                
+                logger.info(f"Keyword '{keyword}': {keyword_posts} posts found")
+                time.sleep(1)  # Rate limiting
+                
+            except Exception as e:
+                logger.error(f"Error searching for keyword '{keyword}': {e}")
+        
+        logger.info(f"Keyword-only scrape completed: {total_posts} total posts")
+        return total_posts
 
 def main():
     """Main function for quick scraper"""
